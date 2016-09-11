@@ -20,7 +20,7 @@ namespace Jint.Runtime.Descriptors.Specialized
             _item = item;
 
             // get all instance indexers with exactly 1 argument
-            var indexers = targetType
+            var indexers = targetType.GetTypeInfo()
                 .GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
             // try to find first indexer having either public getter or setter with matching argument type
@@ -35,7 +35,7 @@ namespace Jint.Runtime.Descriptors.Specialized
                     {
                         _indexer = indexer;
                         // get contains key method to avoid index exception being thrown in dictionaries
-                        _containsKey = targetType.GetMethod("ContainsKey", new Type[] { paramType });
+                        _containsKey = targetType.GetTypeInfo().GetMethod("ContainsKey", new Type[] { paramType });
                         break;
 
                     }

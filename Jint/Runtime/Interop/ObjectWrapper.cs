@@ -60,7 +60,7 @@ namespace Jint.Runtime.Interop
             var type = Target.GetType();
 
             // look for a property
-            var property = type.GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public)
+            var property = type.GetTypeInfo().GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public)
                 .Where(p => EqualsIgnoreCasing(p.Name, propertyName))
                 .FirstOrDefault();
             if (property != null)
@@ -71,7 +71,7 @@ namespace Jint.Runtime.Interop
             }
 
             // look for a field
-            var field = type.GetFields(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public)
+            var field = type.GetTypeInfo().GetFields(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public)
                 .Where(f => EqualsIgnoreCasing(f.Name, propertyName))
                 .FirstOrDefault();
             if (field != null)
@@ -82,7 +82,7 @@ namespace Jint.Runtime.Interop
             }
 
             // if no properties were found then look for a method 
-            var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public)
+            var methods = type.GetTypeInfo().GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public)
                 .Where(m => EqualsIgnoreCasing(m.Name, propertyName))
                 .ToArray();
 
@@ -94,16 +94,16 @@ namespace Jint.Runtime.Interop
             }
 
             // if no methods are found check if target implemented indexing
-            if (type.GetProperties().Where(p => p.GetIndexParameters().Length != 0).FirstOrDefault() != null)
+            if (type.GetTypeInfo().GetProperties().Where(p => p.GetIndexParameters().Length != 0).FirstOrDefault() != null)
             {
                 return new IndexDescriptor(Engine, propertyName, Target);
             }
 
-            var interfaces = type.GetInterfaces();
+            var interfaces = type.GetTypeInfo().GetInterfaces();
 
             // try to find a single explicit property implementation
             var explicitProperties = (from iface in interfaces
-                                      from iprop in iface.GetProperties()
+                                      from iprop in iface.GetTypeInfo().GetProperties()
                                       where EqualsIgnoreCasing(iprop.Name, propertyName)
                                       select iprop).ToArray();
 
@@ -116,7 +116,7 @@ namespace Jint.Runtime.Interop
 
             // try to find explicit method implementations
             var explicitMethods = (from iface in interfaces
-                                   from imethod in iface.GetMethods()
+                                   from imethod in iface.GetTypeInfo().GetMethods()
                                    where EqualsIgnoreCasing(imethod.Name, propertyName)
                                    select imethod).ToArray();
 
@@ -130,7 +130,7 @@ namespace Jint.Runtime.Interop
             // try to find explicit indexer implementations
             var explicitIndexers =
                 (from iface in interfaces
-                 from iprop in iface.GetProperties()
+                 from iprop in iface.GetTypeInfo().GetProperties()
                  where iprop.GetIndexParameters().Length != 0
                  select iprop).ToArray();
 

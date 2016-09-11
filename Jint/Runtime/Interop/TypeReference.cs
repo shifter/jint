@@ -44,7 +44,7 @@ namespace Jint.Runtime.Interop
 
         public ObjectInstance Construct(JsValue[] arguments)
         {
-            if (arguments.Length == 0 && Type.IsValueType)
+            if (arguments.Length == 0 && Type.GetTypeInfo().IsValueType)
             {
                 var instance = Activator.CreateInstance(Type);
                 var result = TypeConverter.ToObject(Engine, JsValue.FromObject(Engine, instance));
@@ -52,7 +52,7 @@ namespace Jint.Runtime.Interop
                 return result;
             }
 
-            var constructors = Type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            var constructors = Type.GetTypeInfo().GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             
             var methods = TypeConverter.FindBestMatch(Engine, constructors, arguments).ToList();
 
@@ -149,7 +149,7 @@ namespace Jint.Runtime.Interop
         {
             // todo: cache members locally
 
-            if (Type.IsEnum)
+            if (Type.GetTypeInfo().IsEnum)
             {
                 Array enumValues = Enum.GetValues(Type);
                 Array enumNames = Enum.GetNames(Type);
@@ -164,19 +164,19 @@ namespace Jint.Runtime.Interop
                 return PropertyDescriptor.Undefined;
             }
 
-            var propertyInfo = Type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Static);
+            var propertyInfo = Type.GetTypeInfo().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Static);
             if (propertyInfo != null)
             {
                 return new PropertyInfoDescriptor(Engine, propertyInfo, Type);
             }
 
-            var fieldInfo = Type.GetField(propertyName, BindingFlags.Public | BindingFlags.Static);
+            var fieldInfo = Type.GetTypeInfo().GetField(propertyName, BindingFlags.Public | BindingFlags.Static);
             if (fieldInfo != null)
             {
                 return new FieldInfoDescriptor(Engine, fieldInfo, Type);
             }
 
-            var methodInfo = Type
+            var methodInfo = Type.GetTypeInfo()
                 .GetMethods(BindingFlags.Public | BindingFlags.Static)
                 .Where(mi => mi.Name == propertyName)
                 .ToArray();

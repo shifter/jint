@@ -101,7 +101,7 @@ namespace Jint.Runtime.Interop
             }
 
             // search in loaded assemblies
-            foreach (var assembly in new[] { Assembly.GetCallingAssembly(), Assembly.GetExecutingAssembly() }.Distinct())
+            foreach (var assembly in new[] { GetType().GetTypeInfo().Assembly, Assembly.GetEntryAssembly(), }.Distinct())
             {
                 type = assembly.GetType(path);
                 if (type != null)
@@ -170,7 +170,7 @@ namespace Jint.Runtime.Interop
 
         private static void AddNestedTypesRecursively(List<Type> types, Type type)
         {
-          Type[] nestedTypes = type.GetNestedTypes(BindingFlags.Public);
+          Type[] nestedTypes = type.GetTypeInfo().GetNestedTypes(BindingFlags.Public);
           foreach (Type nestedType in nestedTypes)
           {
             types.Add(nestedType);
